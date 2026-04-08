@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:expense_tracker/data/repositories/expense_provider.dart';
 import 'package:expense_tracker/data/local/schemas/expense.dart';
-import 'package:expense_tracker/presentation/widgets/glass_card.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:expense_tracker/features/dashboard/widgets/balance_card.dart';
+import 'package:expense_tracker/features/dashboard/widgets/expense_pie_chart.dart';
+import 'package:expense_tracker/features/dashboard/widgets/transaction_list.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 
 import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:expense_tracker/features/sms_parser/services/sms_service.dart';
@@ -85,38 +85,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     children: [
                       const SizedBox(height: 20),
                       // Header / Balance Card
-                      GlassCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Total Balance', 
-                              style: GoogleFonts.outfit(color: subTextColor)
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              settingsNotifier.formatAmount(_calculateTotal(expenses)), 
-                              style: GoogleFonts.outfit(
-                                fontSize: 32, 
-                                fontWeight: FontWeight.bold, 
-                                color: textColor
-                              )
-                            ),
-                          ],
-                        ),
-                      ),
+                      const BalanceCard(),
                       const SizedBox(height: 30),
                       // Pie Chart Section
-                      SizedBox(
-                        height: 200,
-                        child: PieChart(
-                          PieChartData(
-                            sectionsSpace: 5,
-                            centerSpaceRadius: 40,
-                            sections: _getSections(expenses),
-                          ),
-                        ),
-                      ),
+                      const ExpensePieChart(),
                       const SizedBox(height: 30),
                       // Transactions Header
                       Row(
@@ -136,48 +108,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final expense = expenses[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: GlassCard(
-                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                          opacity: 0.05,
-                          child: ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF6366F1).withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(Icons.shopping_bag_outlined, color: Color(0xFF6366F1)),
-                            ),
-                            title: Text(
-                              expense.title, 
-                              style: GoogleFonts.outfit(color: textColor, fontWeight: FontWeight.w600)
-                            ),
-                            subtitle: Text(
-                              settingsNotifier.formatDate(expense.date), 
-                              style: GoogleFonts.outfit(color: isDark ? Colors.white38 : Colors.black38, fontSize: 12)
-                            ),
-                            trailing: Text(
-                              '-${settingsNotifier.formatAmount(expense.amount)}',
-                              style: GoogleFonts.outfit(
-                                color: const Color(0xFFF87171), 
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                    childCount: expenses.length,
-                  ),
-                ),
+                TransactionList(expenses: expenses),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ),
@@ -208,55 +139,5 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  double _calculateTotal(List<Expense> expenses) {
-    if (expenses.isEmpty) return 0.0;
-    double total = 0.0;
-    for (final expense in expenses) {
-      total += expense.amount;
-    }
-    return total;
-  }
 
-  List<PieChartSectionData> _getSections(List<Expense> expenses) {
-    if (expenses.isEmpty) {
-      return [
-        PieChartSectionData(
-          color: Colors.white.withOpacity(0.1), 
-          value: 1, 
-          title: '', 
-          radius: 50
-        ),
-      ];
-    }
-    
-    final Map<String, double> categoryTotals = {};
-    for (var expense in expenses) {
-      categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
-    }
-
-    final colors = [
-      const Color(0xFF6366F1),
-      const Color(0xFF8B5CF6),
-      const Color(0xFFEC4899),
-      const Color(0xFFF43F5E),
-      const Color(0xFFF59E0B),
-    ];
-
-    int colorIndex = 0;
-    return categoryTotals.entries.map((entry) {
-      final color = colors[colorIndex % colors.length];
-      colorIndex++;
-      return PieChartSectionData(
-        color: color,
-        value: entry.value,
-        title: entry.key,
-        radius: 50,
-        titleStyle: GoogleFonts.outfit(
-          fontSize: 12, 
-          fontWeight: FontWeight.bold, 
-          color: Colors.white
-        ),
-      );
-    }).toList();
-  }
 }
