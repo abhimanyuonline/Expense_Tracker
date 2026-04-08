@@ -3,7 +3,7 @@ import 'package:expense_tracker/presentation/widgets/mesh_gradient_background.da
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:expense_tracker/features/dashboard/ui/dashboard_screen.dart';
+import 'package:expense_tracker/features/dashboard/ui/main_shell.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -79,7 +79,7 @@ class LoginScreen extends StatelessWidget {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                    MaterialPageRoute(builder: (_) => const MainShell()),
                   );
                 },
                 child: Text(
