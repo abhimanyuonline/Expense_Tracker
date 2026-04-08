@@ -7,6 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:expense_tracker/features/sms_parser/services/sms_service.dart';
 import 'package:expense_tracker/features/sms_parser/ui/sms_confirmation_dialog.dart';
 import 'package:flutter/services.dart';
@@ -30,9 +31,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   void _initSmsListener() {
+    final settings = ref.read(settingsProvider);
     _smsService.initListener((expense) {
       _showConfirmationDialog(expense);
-    });
+    }, settings);
   }
 
   void _showConfirmationDialog(Expense expense) {
@@ -62,9 +64,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final expensesAsync = ref.watch(expenseListProvider);
+    // Explicitly watch settingsProvider so the screen rebuilds when currency/format changes
+    ref.watch(settingsProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -82,15 +91,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           children: [
                             Text(
                               'Total Balance', 
-                              style: GoogleFonts.outfit(color: Colors.white70)
+                              style: GoogleFonts.outfit(color: subTextColor)
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '\$${_calculateTotal(expenses)}', 
+                              settingsNotifier.formatAmount(_calculateTotal(expenses)), 
                               style: GoogleFonts.outfit(
                                 fontSize: 32, 
                                 fontWeight: FontWeight.bold, 
-                                color: Colors.white
+                                color: textColor
                               )
                             ),
                           ],
@@ -118,7 +127,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             style: GoogleFonts.outfit(
                               fontSize: 20, 
                               fontWeight: FontWeight.bold, 
-                              color: Colors.white
+                              color: textColor
                             ),
                           ),
                         ],
@@ -148,14 +157,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             ),
                             title: Text(
                               expense.title, 
-                              style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)
+                              style: GoogleFonts.outfit(color: textColor, fontWeight: FontWeight.w600)
                             ),
                             subtitle: Text(
-                              DateFormat('dd MMM yyyy').format(expense.date), 
-                              style: GoogleFonts.outfit(color: Colors.white38, fontSize: 12)
+                              settingsNotifier.formatDate(expense.date), 
+                              style: GoogleFonts.outfit(color: isDark ? Colors.white38 : Colors.black38, fontSize: 12)
                             ),
                             trailing: Text(
-                              '-\$${expense.amount.toStringAsFixed(2)}',
+                              '-${settingsNotifier.formatAmount(expense.amount)}',
                               style: GoogleFonts.outfit(
                                 color: const Color(0xFFF87171), 
                                 fontWeight: FontWeight.bold,
@@ -173,7 +182,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ],
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white))),
+            error: (err, stack) => Center(child: Text('Error: $err', style: TextStyle(color: textColor))),
           ),
         ),
       ),
@@ -199,13 +208,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  String _calculateTotal(List<Expense> expenses) {
-    if (expenses.isEmpty) return '0.00';
+  double _calculateTotal(List<Expense> expenses) {
+    if (expenses.isEmpty) return 0.0;
     double total = 0.0;
     for (final expense in expenses) {
       total += expense.amount;
     }
-    return total.toStringAsFixed(2);
+    return total;
   }
 
   List<PieChartSectionData> _getSections(List<Expense> expenses) {

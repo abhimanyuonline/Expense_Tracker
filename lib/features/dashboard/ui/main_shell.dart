@@ -74,7 +74,7 @@ class _MainShellState extends State<MainShell>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       // Keep IndexedStack so each page retains its state
       body: IndexedStack(
         index: _currentIndex,
@@ -118,12 +118,14 @@ class _BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: Theme.of(context).scaffoldBackgroundColor,
         border: Border(
           top: BorderSide(
-            color: Colors.white.withOpacity(0.07),
+            color: isDark ? Colors.white.withValues(alpha: 0.07) : Colors.black.withValues(alpha: 0.05),
             width: 1,
           ),
         ),
@@ -205,6 +207,7 @@ class _NavBarButtonState extends State<_NavBarButton>
   @override
   Widget build(BuildContext context) {
     final isSelected = widget.isSelected;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: _handleTap,
@@ -235,7 +238,7 @@ class _NavBarButtonState extends State<_NavBarButton>
                   key: ValueKey(isSelected),
                   color: isSelected
                       ? const Color(0xFF6366F1)
-                      : Colors.white38,
+                      : (isDark ? Colors.white38 : Colors.black38),
                   size: 24,
                 ),
               ),
@@ -248,7 +251,7 @@ class _NavBarButtonState extends State<_NavBarButton>
                       isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
                       ? const Color(0xFF6366F1)
-                      : Colors.white38,
+                      : (isDark ? Colors.white38 : Colors.black38),
                 ),
                 child: Text(widget.item.label),
               ),

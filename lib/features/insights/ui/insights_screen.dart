@@ -6,8 +6,10 @@ class InsightsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: Column(
@@ -16,7 +18,7 @@ class InsightsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6366F1).withOpacity(0.12),
+                  color: const Color(0xFF6366F1).withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -31,7 +33,7 @@ class InsightsScreen extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
               ),
               const SizedBox(height: 8),
@@ -39,7 +41,7 @@ class InsightsScreen extends StatelessWidget {
                 'Coming soon — stay tuned!',
                 style: GoogleFonts.outfit(
                   fontSize: 14,
-                  color: Colors.white38,
+                  color: isDark ? Colors.white38 : Colors.black38,
                 ),
               ),
             ],
