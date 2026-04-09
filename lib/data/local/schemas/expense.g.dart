@@ -37,18 +37,23 @@ const ExpenseSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'isSynced': PropertySchema(
+    r'isIncome': PropertySchema(
       id: 4,
+      name: r'isIncome',
+      type: IsarType.bool,
+    ),
+    r'isSynced': PropertySchema(
+      id: 5,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'smsId': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'smsId',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'title',
       type: IsarType.string,
     )
@@ -100,9 +105,10 @@ void _expenseSerialize(
   writer.writeString(offsets[1], object.category);
   writer.writeDateTime(offsets[2], object.date);
   writer.writeString(offsets[3], object.description);
-  writer.writeBool(offsets[4], object.isSynced);
-  writer.writeString(offsets[5], object.smsId);
-  writer.writeString(offsets[6], object.title);
+  writer.writeBool(offsets[4], object.isIncome);
+  writer.writeBool(offsets[5], object.isSynced);
+  writer.writeString(offsets[6], object.smsId);
+  writer.writeString(offsets[7], object.title);
 }
 
 Expense _expenseDeserialize(
@@ -117,9 +123,10 @@ Expense _expenseDeserialize(
   object.date = reader.readDateTime(offsets[2]);
   object.description = reader.readStringOrNull(offsets[3]);
   object.id = id;
-  object.isSynced = reader.readBool(offsets[4]);
-  object.smsId = reader.readStringOrNull(offsets[5]);
-  object.title = reader.readString(offsets[6]);
+  object.isIncome = reader.readBool(offsets[4]);
+  object.isSynced = reader.readBool(offsets[5]);
+  object.smsId = reader.readStringOrNull(offsets[6]);
+  object.title = reader.readString(offsets[7]);
   return object;
 }
 
@@ -141,8 +148,10 @@ P _expenseDeserializeProp<P>(
     case 4:
       return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -682,6 +691,16 @@ extension ExpenseQueryFilter
     });
   }
 
+  QueryBuilder<Expense, Expense, QAfterFilterCondition> isIncomeEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isIncome',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Expense, Expense, QAfterFilterCondition> isSyncedEqualTo(
       bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -1024,6 +1043,18 @@ extension ExpenseQuerySortBy on QueryBuilder<Expense, Expense, QSortBy> {
     });
   }
 
+  QueryBuilder<Expense, Expense, QAfterSortBy> sortByIsIncome() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isIncome', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Expense, Expense, QAfterSortBy> sortByIsIncomeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isIncome', Sort.desc);
+    });
+  }
+
   QueryBuilder<Expense, Expense, QAfterSortBy> sortByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.asc);
@@ -1123,6 +1154,18 @@ extension ExpenseQuerySortThenBy
     });
   }
 
+  QueryBuilder<Expense, Expense, QAfterSortBy> thenByIsIncome() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isIncome', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Expense, Expense, QAfterSortBy> thenByIsIncomeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isIncome', Sort.desc);
+    });
+  }
+
   QueryBuilder<Expense, Expense, QAfterSortBy> thenByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.asc);
@@ -1188,6 +1231,12 @@ extension ExpenseQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Expense, Expense, QDistinct> distinctByIsIncome() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isIncome');
+    });
+  }
+
   QueryBuilder<Expense, Expense, QDistinct> distinctByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isSynced');
@@ -1238,6 +1287,12 @@ extension ExpenseQueryProperty
   QueryBuilder<Expense, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<Expense, bool, QQueryOperations> isIncomeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isIncome');
     });
   }
 

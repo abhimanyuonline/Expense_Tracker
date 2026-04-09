@@ -24,7 +24,9 @@ final totalBalanceProvider = Provider<double>((ref) {
     data: (expenses) {
       double total = 0.0;
       for (final expense in expenses) {
-        total += expense.amount;
+        if (!expense.isIncome) {
+          total += expense.amount;
+        }
       }
       return total;
     },
@@ -38,7 +40,9 @@ final expenseCategoryTotalsProvider = Provider<Map<String, double>>((ref) {
     data: (expenses) {
       final Map<String, double> categoryTotals = {};
       for (var expense in expenses) {
-        categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
+        if (!expense.isIncome) {
+          categoryTotals[expense.category] = (categoryTotals[expense.category] ?? 0) + expense.amount;
+        }
       }
       return categoryTotals;
     },

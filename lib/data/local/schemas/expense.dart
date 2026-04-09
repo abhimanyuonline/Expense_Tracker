@@ -15,6 +15,8 @@ class Expense {
   
   bool isSynced = false;
   
+  bool isIncome = false; // Added for income tracking
+  
   // For SMS parsing identification
   String? smsId;
 }

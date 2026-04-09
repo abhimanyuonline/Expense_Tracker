@@ -1,5 +1,6 @@
 import 'package:expense_tracker/data/local/schemas/category.dart';
 import 'package:expense_tracker/data/local/schemas/expense.dart';
+import 'package:expense_tracker/data/local/schemas/expected_income.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -14,7 +15,7 @@ class IsarService {
     final dir = await getApplicationDocumentsDirectory();
     if (Isar.instanceNames.isEmpty) {
       final isar = await Isar.open(
-        [ExpenseSchema, CategorySchema],
+        [ExpenseSchema, CategorySchema, ExpectedIncomeSchema],
         inspector: true,
         directory: dir.path,
       );
@@ -49,8 +50,34 @@ class IsarService {
             ..amount = 85.20
             ..date = DateTime.now().subtract(const Duration(days: 2))
             ..category = 'Food',
+          // Mock Income
+          Expense()
+            ..title = 'Freelance Project'
+            ..amount = 500.00
+            ..isIncome = true
+            ..date = DateTime.now().subtract(const Duration(days: 4))
+            ..category = 'Income',
+          Expense()
+            ..title = 'Client Retainer'
+            ..amount = 1200.00
+            ..isIncome = true
+            ..date = DateTime.now().subtract(const Duration(days: 15))
+            ..category = 'Income',
         ];
         await isar.expenses.putAll(expenses);
+      });
+      await isar.writeTxn(() async {
+        final expectedIncomes = [
+          ExpectedIncome()
+             ..amount = 300.00
+             ..sourceLabel = 'Pending Client'
+             ..expectedDate = DateTime.now().subtract(const Duration(days: 4)), // Overdue
+          ExpectedIncome()
+             ..amount = 1000.00
+             ..sourceLabel = 'Salary'
+             ..expectedDate = DateTime.now().add(const Duration(days: 2)), // Upcoming
+        ];
+        await isar.expectedIncomes.putAll(expectedIncomes);
       });
     }
   }

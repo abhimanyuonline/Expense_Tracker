@@ -9,4 +9,5 @@ class Category {
   late String name;
   late int iconCode; // Store icon point
   late int colorValue; // Store hex color
+  double? budgetCap; // Added for overspend warnings
 }

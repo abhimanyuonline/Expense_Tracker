@@ -17,18 +17,23 @@ const CategorySchema = CollectionSchema(
   name: r'Category',
   id: 5751694338128944171,
   properties: {
-    r'colorValue': PropertySchema(
+    r'budgetCap': PropertySchema(
       id: 0,
+      name: r'budgetCap',
+      type: IsarType.double,
+    ),
+    r'colorValue': PropertySchema(
+      id: 1,
       name: r'colorValue',
       type: IsarType.long,
     ),
     r'iconCode': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'iconCode',
       type: IsarType.long,
     ),
     r'name': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'name',
       type: IsarType.string,
     )
@@ -63,9 +68,10 @@ void _categorySerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.colorValue);
-  writer.writeLong(offsets[1], object.iconCode);
-  writer.writeString(offsets[2], object.name);
+  writer.writeDouble(offsets[0], object.budgetCap);
+  writer.writeLong(offsets[1], object.colorValue);
+  writer.writeLong(offsets[2], object.iconCode);
+  writer.writeString(offsets[3], object.name);
 }
 
 Category _categoryDeserialize(
@@ -75,10 +81,11 @@ Category _categoryDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Category();
-  object.colorValue = reader.readLong(offsets[0]);
-  object.iconCode = reader.readLong(offsets[1]);
+  object.budgetCap = reader.readDoubleOrNull(offsets[0]);
+  object.colorValue = reader.readLong(offsets[1]);
+  object.iconCode = reader.readLong(offsets[2]);
   object.id = id;
-  object.name = reader.readString(offsets[2]);
+  object.name = reader.readString(offsets[3]);
   return object;
 }
 
@@ -90,10 +97,12 @@ P _categoryDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
+      return (reader.readLong(offset)) as P;
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -189,6 +198,84 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
 
 extension CategoryQueryFilter
     on QueryBuilder<Category, Category, QFilterCondition> {
+  QueryBuilder<Category, Category, QAfterFilterCondition> budgetCapIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'budgetCap',
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> budgetCapIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'budgetCap',
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> budgetCapEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'budgetCap',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> budgetCapGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'budgetCap',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> budgetCapLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'budgetCap',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterFilterCondition> budgetCapBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'budgetCap',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<Category, Category, QAfterFilterCondition> colorValueEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -485,6 +572,18 @@ extension CategoryQueryLinks
     on QueryBuilder<Category, Category, QFilterCondition> {}
 
 extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
+  QueryBuilder<Category, Category, QAfterSortBy> sortByBudgetCap() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'budgetCap', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterSortBy> sortByBudgetCapDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'budgetCap', Sort.desc);
+    });
+  }
+
   QueryBuilder<Category, Category, QAfterSortBy> sortByColorValue() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorValue', Sort.asc);
@@ -524,6 +623,18 @@ extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
 
 extension CategoryQuerySortThenBy
     on QueryBuilder<Category, Category, QSortThenBy> {
+  QueryBuilder<Category, Category, QAfterSortBy> thenByBudgetCap() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'budgetCap', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Category, Category, QAfterSortBy> thenByBudgetCapDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'budgetCap', Sort.desc);
+    });
+  }
+
   QueryBuilder<Category, Category, QAfterSortBy> thenByColorValue() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorValue', Sort.asc);
@@ -575,6 +686,12 @@ extension CategoryQuerySortThenBy
 
 extension CategoryQueryWhereDistinct
     on QueryBuilder<Category, Category, QDistinct> {
+  QueryBuilder<Category, Category, QDistinct> distinctByBudgetCap() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'budgetCap');
+    });
+  }
+
   QueryBuilder<Category, Category, QDistinct> distinctByColorValue() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'colorValue');
@@ -600,6 +717,12 @@ extension CategoryQueryProperty
   QueryBuilder<Category, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Category, double?, QQueryOperations> budgetCapProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'budgetCap');
     });
   }
 
