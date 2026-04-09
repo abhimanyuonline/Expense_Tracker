@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
+import 'package:expense_tracker/data/repositories/expense_provider.dart';
 
 class CategoryBreakdownDonut extends ConsumerStatefulWidget {
   const CategoryBreakdownDonut({super.key});
@@ -16,24 +16,9 @@ class _CategoryBreakdownDonutState extends ConsumerState<CategoryBreakdownDonut>
 
   @override
   Widget build(BuildContext context) {
-    // In actual implementation, we might need a distinct category breakdowns provider.
-    // For this demonstration, we'll use a mocked map based on categoryListProvider if it were aggregated.
-    // We can compute it right here for simplicity, reusing logic.
-    final overspendWarnings = ref.watch(overspendWarningProvider); 
+    // We correctly compute it by watching expenseCategoryTotalsProvider
+    final aggregatedData = ref.watch(expenseCategoryTotalsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // Fallback static data if no overspend is present just for visual structure. 
-    // Ideally this comes from a dedicated provider.
-    final mockData = {
-      'Food': 450.50,
-      'Transport': 120.0,
-      'Rent': 1200.0,
-      'Entertainment': 300.0,
-    };
-    
-    final Map<String, double> aggregatedData = overspendWarnings.isNotEmpty 
-      ? { for (var w in overspendWarnings) w.category: w.spent } 
-      : mockData;
 
     final colors = [
       const Color(0xFF6366F1),
