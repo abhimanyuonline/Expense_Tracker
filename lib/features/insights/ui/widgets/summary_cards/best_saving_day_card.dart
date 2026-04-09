@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:intl/intl.dart';
 
 class BestSavingDayCard extends ConsumerWidget {
@@ -70,7 +71,7 @@ class BestSavingDayCard extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      'Spent: \$${amount.toStringAsFixed(2)}',
+                      'Spent: ${ref.read(settingsProvider.notifier).formatAmount(amount)}',
                       style: GoogleFonts.outfit(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,

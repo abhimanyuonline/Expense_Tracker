@@ -5,16 +5,34 @@ import 'package:expense_tracker/data/repositories/expense_provider.dart';
 import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:mesh_gradient/mesh_gradient.dart';
 
+/// Provider computes Month-over-Month spend change as a percentage.
+final momChangeProvider = Provider<double>((ref) {
+  final expenses = ref.watch(expenseListProvider).valueOrNull ?? [];
+  final now = DateTime.now();
+  double current = 0;
+  double previous = 0;
+  for (final e in expenses) {
+    if (e.isIncome) continue;
+    if (e.date.year == now.year && e.date.month == now.month) {
+      current += e.amount;
+    } else if (e.date.year == now.year && e.date.month == now.month - 1) {
+      previous += e.amount;
+    }
+  }
+  if (previous == 0) return 0;
+  return ((current - previous) / previous) * 100;
+});
+
 class AnimatedBalanceCard extends ConsumerWidget {
   const AnimatedBalanceCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
     final settingsNotifier = ref.read(settingsProvider.notifier);
     final totalBalance = ref.watch(totalBalanceProvider);
     final monthlyIncome = ref.watch(currentMonthIncomeProvider);
     final monthlySpend = ref.watch(currentMonthSpendProvider);
+    final momChange = ref.watch(momChangeProvider);
     final saved = monthlyIncome - monthlySpend;
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -77,7 +95,7 @@ class AnimatedBalanceCard extends ConsumerWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      _buildMoMBadge(),
+                      _buildMoMBadge(momChange),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -106,9 +124,9 @@ class AnimatedBalanceCard extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildMiniInfo('Income', monthlyIncome, Colors.greenAccent),
-                      _buildMiniInfo('Spent', monthlySpend, Colors.orangeAccent),
-                      _buildMiniInfo('Saved', saved > 0 ? saved : 0, Colors.cyanAccent),
+                      _buildMiniInfo('Income', monthlyIncome, Colors.greenAccent, settingsNotifier),
+                      _buildMiniInfo('Spent', monthlySpend, Colors.orangeAccent, settingsNotifier),
+                      _buildMiniInfo('Saved', saved > 0 ? saved : 0, Colors.cyanAccent, settingsNotifier),
                     ],
                   ),
                 ],
@@ -120,9 +138,14 @@ class AnimatedBalanceCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildMoMBadge() {
-    // For now, hardcode a positive badge. 
-    // In a real app, you'd compare currentMonthSpend with lastMonthSpend.
+  Widget _buildMoMBadge(double momChange) {
+    final isPositive = momChange <= 0; // Spending LESS is positive (good)
+    final displayChange = momChange.abs();
+    final label = momChange == 0
+        ? 'Same'
+        : '${isPositive ? "-" : "+"}${displayChange.toStringAsFixed(1)}%';
+    final icon = isPositive ? Icons.trending_down : Icons.trending_up;
+    final color = isPositive ? Colors.greenAccent : Colors.orangeAccent;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -132,10 +155,10 @@ class AnimatedBalanceCard extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.trending_up, color: Colors.greenAccent, size: 14),
+          Icon(icon, color: color, size: 14),
           const SizedBox(width: 4),
           Text(
-            '+12.5%',
+            label,
             style: GoogleFonts.outfit(
               color: Colors.white,
               fontSize: 12,
@@ -147,7 +170,7 @@ class AnimatedBalanceCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildMiniInfo(String label, double amount, Color color) {
+  Widget _buildMiniInfo(String label, double amount, Color color, SettingsNotifier settingsNotifier) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,7 +183,7 @@ class AnimatedBalanceCard extends ConsumerWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          '\$${amount.toStringAsFixed(0)}',
+          settingsNotifier.formatAmount(amount),
           style: GoogleFonts.outfit(
             color: Colors.white,
             fontSize: 16,

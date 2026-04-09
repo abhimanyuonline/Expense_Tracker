@@ -65,14 +65,15 @@ final budgetProgressProvider = Provider<List<BudgetRingData>>((ref) {
   final categories = ref.watch(categoryListProvider).valueOrNull ?? [];
   final monthlySpend = ref.watch(currentMonthSpendProvider);
   
-  // 1. Overall Monthly Budget
-  // Assuming a static global budget for demo purposes, or we could sum category caps
+  // 1. Overall Monthly Budget — sum of all category caps; fallback to 70% of income
   double totalBudgetCap = categories.fold(0.0, (sum, c) => sum + (c.budgetCap ?? 0.0));
-  if (totalBudgetCap == 0) totalBudgetCap = 2000.0; // Default mock budget
-
-  // 2. Savings Goal
-  // Mock savings goal progress
   final monthlyIncome = ref.watch(currentMonthIncomeProvider);
+  if (totalBudgetCap == 0) {
+    // No categories seeded yet — use 70% of income as a reasonable live estimate
+    totalBudgetCap = monthlyIncome > 0 ? monthlyIncome * 0.70 : 3000.0;
+  }
+
+  // 2. Savings Goal — save 20% of monthly income
   final saved = monthlyIncome - monthlySpend;
   final savingsGoal = monthlyIncome * 0.20; // Goal: Save 20% of income
 
@@ -106,7 +107,7 @@ final budgetProgressProvider = Provider<List<BudgetRingData>>((ref) {
         worstCategory = BudgetRingData(
           title: topCatName,
           spent: topCatSpend,
-          limit: cap > 0 ? cap : 1000,
+          limit: cap > 0 ? cap : (topCatSpend > 0 ? topCatSpend * 1.2 : 100),
         );
       }
   }
@@ -114,6 +115,6 @@ final budgetProgressProvider = Provider<List<BudgetRingData>>((ref) {
   return [
     BudgetRingData(title: 'Monthly Budget', spent: monthlySpend, limit: totalBudgetCap),
     if (worstCategory != null) worstCategory,
-    BudgetRingData(title: 'Savings Goal', spent: saved > 0 ? saved : 0, limit: savingsGoal > 0 ? savingsGoal : 500),
+    BudgetRingData(title: 'Savings Goal', spent: saved > 0 ? saved : 0, limit: savingsGoal > 0 ? savingsGoal : (monthlyIncome > 0 ? monthlyIncome * 0.1 : 200)),
   ];
 });

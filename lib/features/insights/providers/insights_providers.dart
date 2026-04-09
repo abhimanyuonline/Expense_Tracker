@@ -32,19 +32,30 @@ final selectedPeriodProvider = StateProvider<String>((ref) => 'This Month');
 
 // ------------- 1. Smart Summary Cards -------------
 
-final topInsightProvider = Provider<String>((ref) {
+class TopInsightData {
+  final double amount;
+  final String category;
+  final String message;
+  TopInsightData(this.amount, this.category, this.message);
+}
+
+final topInsightProvider = Provider<TopInsightData?>((ref) {
   final expenses = ref.watch(expenseListProvider).valueOrNull ?? [];
-  if (expenses.isEmpty) return "No data yet. Start tracking!";
+  if (expenses.isEmpty) return null;
   
   // Example logic: Find largest transaction this week
   final now = DateTime.now();
   final recentExpenses = expenses.where((e) => !e.isIncome && now.difference(e.date).inDays <= 7).toList();
-  if (recentExpenses.isEmpty) return "You're on track! No major spending lately.";
+  if (recentExpenses.isEmpty) return null;
   
   recentExpenses.sort((a, b) => b.amount.compareTo(a.amount));
   final largest = recentExpenses.first;
   
-  return "Large transaction recently: \$${largest.amount.toStringAsFixed(2)} on ${largest.category}.";
+  return TopInsightData(
+    largest.amount, 
+    largest.category, 
+    "Large transaction recently on ${largest.category}:"
+  );
 });
 
 class SpendComparison {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 
 class DailySpendLineChart extends ConsumerWidget {
   const DailySpendLineChart({super.key});
@@ -65,7 +66,7 @@ class DailySpendLineChart extends ConsumerWidget {
                     touchTooltipData: LineTouchTooltipData(
                       getTooltipItems: (touchedSpots) {
                         return touchedSpots.map((spot) => LineTooltipItem(
-                          '\$${spot.y.toStringAsFixed(2)}',
+                          ref.read(settingsProvider.notifier).formatAmount(spot.y),
                           GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold),
                         )).toList();
                       },

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/data/repositories/expense_provider.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
+import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
 
 class TopMerchantsLeaderboard extends ConsumerWidget {
   const TopMerchantsLeaderboard({super.key});
@@ -35,13 +37,13 @@ class TopMerchantsLeaderboard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          ...topMerchants.map((data) => _buildMerchantRow(data, maxAmount, isDark)).toList(),
+          ...topMerchants.map((data) => _buildMerchantRow(ref, data, maxAmount, isDark)).toList(),
         ],
       ),
     );
   }
 
-  Widget _buildMerchantRow(Map<String, dynamic> data, double maxAmount, bool isDark) {
+  Widget _buildMerchantRow(WidgetRef ref, Map<String, dynamic> data, double maxAmount, bool isDark) {
     final amount = data['amount'] as double;
     final name = data['merchant'] as String;
     final isSms = data['isSms'] as bool;
@@ -85,7 +87,7 @@ class TopMerchantsLeaderboard extends ConsumerWidget {
                 ],
               ),
               Text(
-                '\$${amount.toStringAsFixed(2)}',
+                ref.read(settingsProvider.notifier).formatAmount(amount),
                 style: GoogleFonts.outfit(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,

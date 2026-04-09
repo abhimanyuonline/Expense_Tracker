@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:expense_tracker/data/local/schemas/expense.dart';
 import 'package:expense_tracker/data/repositories/expense_provider.dart';
 import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
+import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
 import 'package:expense_tracker/presentation/widgets/glass_card.dart';
 
 class SmartTransactionList extends ConsumerWidget {
@@ -105,6 +106,9 @@ class SmartTransactionList extends ConsumerWidget {
     final settingsNotifier = ref.read(settingsProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
+    
+    // Get categories to find the correct icon/color
+    final categories = ref.watch(categoryListProvider).valueOrNull ?? [];
 
     return Dismissible(
       key: ValueKey('tx_${expense.id}'),
@@ -141,7 +145,7 @@ class SmartTransactionList extends ConsumerWidget {
           opacity: isDark ? 0.03 : 0.05,
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: _buildCategoryIcon(expense.category),
+            leading: _buildCategoryIcon(expense.category, categories),
             title: Row(
               children: [
                 Expanded(
@@ -194,38 +198,37 @@ class SmartTransactionList extends ConsumerWidget {
     );
   }
 
-  Widget _buildCategoryIcon(String category) {
-    IconData iconData;
-    Color color;
+  Widget _buildCategoryIcon(String categoryName, List<dynamic> categories) {
+    // Try to find matching category object
+    final matches = categories.where((c) => c.name.toLowerCase() == categoryName.toLowerCase());
+    final catObj = matches.isEmpty ? null : matches.first;
 
-    switch (category.toLowerCase()) {
-      case 'food':
-        iconData = Icons.restaurant_rounded;
-        color = Colors.orange;
-        break;
-      case 'transport':
-        iconData = Icons.directions_car_rounded;
-        color = Colors.blue;
-        break;
-      case 'rent':
-        iconData = Icons.home_rounded;
-        color = Colors.purple;
-        break;
-      case 'bills':
-        iconData = Icons.receipt_long_rounded;
-        color = Colors.red;
-        break;
-      case 'shopping':
-        iconData = Icons.shopping_bag_rounded;
-        color = Colors.pink;
-        break;
-      case 'income':
-        iconData = Icons.account_balance_wallet_rounded;
-        color = Colors.green;
-        break;
-      default:
-        iconData = Icons.category_rounded;
-        color = Colors.grey;
+    IconData iconData = Icons.category_rounded;
+    Color color = Colors.grey;
+
+    if (catObj != null) {
+      iconData = IconData(catObj.iconCode, fontFamily: 'MaterialIcons');
+      color = Color(catObj.colorValue);
+    } else {
+      // Fallback logic for legacy strings if match fails
+      switch (categoryName.toLowerCase()) {
+        case 'food':
+          iconData = Icons.restaurant_rounded;
+          color = Colors.orange;
+          break;
+        case 'transport':
+          iconData = Icons.directions_car_rounded;
+          color = Colors.blue;
+          break;
+        case 'rent':
+          iconData = Icons.home_rounded;
+          color = Colors.purple;
+          break;
+        case 'income':
+          iconData = Icons.account_balance_wallet_rounded;
+          color = Colors.green;
+          break;
+      }
     }
 
     return Container(

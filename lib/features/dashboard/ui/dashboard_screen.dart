@@ -81,13 +81,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 floating: true,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                title: Text(
-                  'Dashboard',
-                  style: GoogleFonts.outfit(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
+                title: Consumer(
+                  builder: (context, ref, _) {
+                    final settings = ref.watch(settingsProvider);
+                    final firstName = settings.displayName.trim().split(' ').first;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hi, $firstName 👋',
+                          style: GoogleFonts.outfit(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: textColor,
+                          ),
+                        ),
+                        Text(
+                          'Here\'s your financial overview',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 actions: const [
                   NotificationBell(),

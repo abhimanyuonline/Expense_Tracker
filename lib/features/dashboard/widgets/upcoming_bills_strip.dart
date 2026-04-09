@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:expense_tracker/data/repositories/expense_provider.dart';
 import 'package:expense_tracker/features/dashboard/providers/dashboard_providers.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:expense_tracker/data/local/schemas/recurring_transaction.dart';
 
 class UpcomingBillsStrip extends ConsumerWidget {
@@ -116,7 +116,7 @@ class UpcomingBillsStrip extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  '\$${bill.amount.toStringAsFixed(0)}',
+                  ref.read(settingsProvider.notifier).formatAmount(bill.amount),
                   style: GoogleFonts.outfit(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:expense_tracker/data/repositories/expense_provider.dart';
@@ -65,9 +66,9 @@ class SevenDaySparkline extends ConsumerWidget {
                       tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         return BarTooltipItem(
-                          '\$${rod.toY.toStringAsFixed(0)}',
+                          ref.read(settingsProvider.notifier).formatAmount(rod.toY),
                           GoogleFonts.outfit(
-                            color: isDark ? Colors.white : Colors.black87,
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         );

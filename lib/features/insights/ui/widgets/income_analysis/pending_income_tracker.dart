@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:intl/intl.dart';
 
 class PendingIncomeTracker extends ConsumerStatefulWidget {
@@ -106,7 +107,7 @@ class _PendingIncomeTrackerState extends ConsumerState<PendingIncomeTracker> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${income.amount.toStringAsFixed(2)}',
+                          ref.read(settingsProvider.notifier).formatAmount(income.amount),
                           style: GoogleFonts.outfit(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

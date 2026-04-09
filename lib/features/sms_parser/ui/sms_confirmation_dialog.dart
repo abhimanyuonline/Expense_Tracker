@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 import 'package:expense_tracker/data/local/schemas/expense.dart';
 import 'package:expense_tracker/presentation/widgets/glass_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SmsConfirmationDialog extends StatelessWidget {
+class SmsConfirmationDialog extends ConsumerWidget {
   final Expense expense;
   final VoidCallback onConfirm;
   final VoidCallback onDismiss;
@@ -16,7 +18,7 @@ class SmsConfirmationDialog extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -66,7 +68,7 @@ class SmsConfirmationDialog extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '\$${expense.amount.toStringAsFixed(2)}',
+                    ref.read(settingsProvider.notifier).formatAmount(expense.amount),
                     style: const TextStyle(color: Color(0xFFF87171), fontWeight: FontWeight.bold, fontSize: 20),
                   ),
                 ],

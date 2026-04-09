@@ -17,7 +17,7 @@ class SettingsNotifier extends StateNotifier<SettingsModel> {
 
   void _loadSettings() {
     state = SettingsModel(
-      displayName: prefs.getString('displayName') ?? 'Your Name',
+      displayName: prefs.getString('displayName') ?? 'Abhimanyu',
       profileImagePath: prefs.getString('profileImagePath') ?? '',
       isDarkMode: prefs.getBool('isDarkMode') ?? true,
       currency: prefs.getString('currency') ?? '\$',

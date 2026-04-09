@@ -4,12 +4,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
 import 'dart:ui';
 
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
+import 'package:expense_tracker/data/repositories/expense_provider.dart';
+import 'dart:ui';
+
 class TopInsightCard extends ConsumerWidget {
   const TopInsightCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final insight = ref.watch(topInsightProvider);
+    final insightData = ref.watch(topInsightProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+
+    if (insightData == null) return const SizedBox.shrink();
 
     return Container(
       width: double.infinity,
@@ -60,7 +67,7 @@ class TopInsightCard extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                insight,
+                '${insightData.message} ${settingsNotifier.formatAmount(insightData.amount)}',
                 style: GoogleFonts.outfit(
                   color: Colors.white,
                   fontSize: 22,

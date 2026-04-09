@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 
 class OverspendWarningCard extends ConsumerWidget {
   const OverspendWarningCard({super.key});
@@ -62,7 +63,7 @@ class OverspendWarningCard extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        '\$${warning.spent.toStringAsFixed(0)} / \$${warning.cap.toStringAsFixed(0)}',
+                        '${ref.read(settingsProvider.notifier).formatAmount(warning.spent)} / ${ref.read(settingsProvider.notifier).formatAmount(warning.cap)}',
                         style: GoogleFonts.outfit(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

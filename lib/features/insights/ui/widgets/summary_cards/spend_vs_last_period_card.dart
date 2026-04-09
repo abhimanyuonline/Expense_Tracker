@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 
 class SpendVsLastPeriodCard extends ConsumerWidget {
   const SpendVsLastPeriodCard({super.key});
@@ -84,7 +85,7 @@ class SpendVsLastPeriodCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '\$${comparison.currentAmount.toStringAsFixed(2)}',
+                      ref.read(settingsProvider.notifier).formatAmount(comparison.currentAmount),
                       style: GoogleFonts.outfit(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -114,7 +115,7 @@ class SpendVsLastPeriodCard extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${comparison.previousAmount.toStringAsFixed(2)}',
+                        ref.read(settingsProvider.notifier).formatAmount(comparison.previousAmount),
                         style: GoogleFonts.outfit(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,

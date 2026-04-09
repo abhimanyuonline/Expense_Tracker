@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:expense_tracker/features/insights/providers/insights_providers.dart';
+import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
 
 class IncomeSourcesBreakdown extends ConsumerWidget {
   const IncomeSourcesBreakdown({super.key});
@@ -96,7 +97,7 @@ class IncomeSourcesBreakdown extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '\$${dataEntry.value.toStringAsFixed(2)}',
+                    ref.read(settingsProvider.notifier).formatAmount(dataEntry.value),
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.bold,
                       color: isDark ? Colors.white : Colors.black,
