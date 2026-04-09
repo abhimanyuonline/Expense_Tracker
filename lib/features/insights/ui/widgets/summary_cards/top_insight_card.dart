@@ -38,7 +38,7 @@ class TopInsightCard extends ConsumerWidget {
             child: Icon(
               Icons.auto_awesome,
               size: 100,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
             ),
           ),
           Column(

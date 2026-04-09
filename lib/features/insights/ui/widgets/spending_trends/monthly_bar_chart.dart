@@ -21,7 +21,7 @@ class MonthlyBarChart extends ConsumerWidget {
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         ),
       ),
       child: Column(
@@ -42,69 +42,66 @@ class MonthlyBarChart extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               child: SizedBox(
                 width: 600, // Make it wide so it's scrollable
-                child: BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    maxY: _getMaxY(monthlyData) * 1.2,
-                    barTouchData: BarTouchData(enabled: true),
-                    titlesData: FlTitlesData(
-                      show: true,
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (double value, TitleMeta meta) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                months[value.toInt() - 1],
-                                style: GoogleFonts.outfit(
-                                  color: isDark ? Colors.white54 : Colors.black54,
-                                  fontSize: 12,
+                child: RepaintBoundary(
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: _getMaxY(monthlyData) * 1.2,
+                      barTouchData: BarTouchData(enabled: true),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (double value, TitleMeta meta) {
+                              if (value.toInt() <= 0 || value.toInt() > 12) return const SizedBox();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  months[value.toInt() - 1],
+                                  style: GoogleFonts.outfit(
+                                    color: isDark ? Colors.white54 : Colors.black54,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
+                        ),
+                        leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      ),
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: isDark ? Colors.white10 : Colors.black12,
+                          strokeWidth: 1,
+                          dashArray: [5, 5],
                         ),
                       ),
-                      leftTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
+                      borderData: FlBorderData(show: false),
+                      barGroups: monthlyData.map((data) {
+                        return BarChartGroupData(
+                          x: data['month'],
+                          barRods: [
+                            BarChartRodData(
+                              toY: data['expense'],
+                              color: const Color(0xFFFF7A7A),
+                              width: 8,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            BarChartRodData(
+                              toY: data['income'],
+                              color: const Color(0xFF10B981),
+                              width: 8,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ],
+                        );
+                      }).toList(),
                     ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      getDrawingHorizontalLine: (value) => FlLine(
-                        color: isDark ? Colors.white10 : Colors.black12,
-                        strokeWidth: 1,
-                        dashArray: [5, 5],
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    barGroups: monthlyData.map((data) {
-                      return BarChartGroupData(
-                        x: data['month'],
-                        barRods: [
-                          BarChartRodData(
-                            toY: data['expense'],
-                            color: const Color(0xFFFF7A7A), // Coral
-                            width: 8,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          BarChartRodData(
-                            toY: data['income'],
-                            color: const Color(0xFF10B981), // Teal/Green
-                            width: 8,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ],
-                      );
-                    }).toList(),
                   ),
                 ),
               ),
@@ -127,18 +124,17 @@ class MonthlyBarChart extends ConsumerWidget {
   double _getMaxY(List<Map<String, dynamic>> data) {
     double max = 0;
     for (var d in data) {
-      if (d['expense'] > max) max = d['expense'];
-      if (d['income'] > max) max = d['income'];
+      if (d['expense'] > max) max = (d['expense'] as num).toDouble();
+      if (d['income'] > max) max = (d['income'] as num).toDouble();
     }
-    return max == 0 ? 100 : max; // Default max if 0
+    return max == 0 ? 100 : max;
   }
 
   Widget _buildLegend(String label, Color color, bool isDark) {
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 12, height: 12,
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
         const SizedBox(width: 8),

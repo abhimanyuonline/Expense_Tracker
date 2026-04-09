@@ -129,9 +129,9 @@ class _NavBarButtonState extends State<_NavBarButton>
           curve: Curves.easeInOut,
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected
-                ? const Color(0xFF6366F1).withOpacity(0.15)
-                : Colors.transparent,
+                color: isSelected
+                    ? const Color(0xFF6366F1).withValues(alpha: 0.15)
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(

@@ -11,13 +11,15 @@ class ExpensePieChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final categoryTotals = ref.watch(expenseCategoryTotalsProvider);
     
-    return SizedBox(
-      height: 200,
-      child: PieChart(
-        PieChartData(
-          sectionsSpace: 5,
-          centerSpaceRadius: 40,
-          sections: _getSections(categoryTotals),
+    return RepaintBoundary(
+      child: SizedBox(
+        height: 200,
+        child: PieChart(
+          PieChartData(
+            sectionsSpace: 5,
+            centerSpaceRadius: 40,
+            sections: _getSections(categoryTotals),
+          ),
         ),
       ),
     );
@@ -27,7 +29,7 @@ class ExpensePieChart extends ConsumerWidget {
     if (categoryTotals.isEmpty) {
       return [
         PieChartSectionData(
-          color: Colors.white.withOpacity(0.1), 
+          color: Colors.white.withValues(alpha: 0.1), 
           value: 1, 
           title: '', 
           radius: 50

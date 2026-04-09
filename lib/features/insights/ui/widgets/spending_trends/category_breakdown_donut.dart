@@ -16,7 +16,6 @@ class _CategoryBreakdownDonutState extends ConsumerState<CategoryBreakdownDonut>
 
   @override
   Widget build(BuildContext context) {
-    // We correctly compute it by watching expenseCategoryTotalsProvider
     final aggregatedData = ref.watch(expenseCategoryTotalsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -37,7 +36,7 @@ class _CategoryBreakdownDonutState extends ConsumerState<CategoryBreakdownDonut>
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         ),
       ),
       child: Column(
@@ -54,25 +53,27 @@ class _CategoryBreakdownDonutState extends ConsumerState<CategoryBreakdownDonut>
           const SizedBox(height: 30),
           SizedBox(
             height: 200,
-            child: PieChart(
-              PieChartData(
-                pieTouchData: PieTouchData(
-                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                    setState(() {
-                      if (!event.isInterestedForInteractions ||
-                          pieTouchResponse == null ||
-                          pieTouchResponse.touchedSection == null) {
-                        touchedIndex = -1;
-                        return;
-                      }
-                      touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
-                    });
-                  },
+            child: RepaintBoundary(
+              child: PieChart(
+                PieChartData(
+                  pieTouchData: PieTouchData(
+                    touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                      setState(() {
+                        if (!event.isInterestedForInteractions ||
+                            pieTouchResponse == null ||
+                            pieTouchResponse.touchedSection == null) {
+                          touchedIndex = -1;
+                          return;
+                        }
+                        touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                      });
+                    },
+                  ),
+                  borderData: FlBorderData(show: false),
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 60,
+                  sections: _showingSections(aggregatedData, total, colors),
                 ),
-                borderData: FlBorderData(show: false),
-                sectionsSpace: 2,
-                centerSpaceRadius: 60,
-                sections: _showingSections(aggregatedData, total, colors),
               ),
             ),
           ),
@@ -91,7 +92,7 @@ class _CategoryBreakdownDonutState extends ConsumerState<CategoryBreakdownDonut>
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: isTouched 
-                    ? colors[idx % colors.length].withOpacity(0.1) 
+                    ? colors[idx % colors.length].withValues(alpha: 0.1) 
                     : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -123,12 +124,12 @@ class _CategoryBreakdownDonutState extends ConsumerState<CategoryBreakdownDonut>
                     ),
                     const SizedBox(width: 8),
                     SizedBox(
-                      width: 45,
+                      width: 50,
                       child: Text(
                         '${pct.toStringAsFixed(1)}%',
                         textAlign: TextAlign.right,
                         style: GoogleFonts.outfit(
-                          color: isDark ? Colors.white38 : Colors.black38,
+                          color: isDark ? Colors.white.withValues(alpha: 0.38) : Colors.black.withValues(alpha: 0.38),
                           fontSize: 12,
                         ),
                       ),
@@ -146,7 +147,7 @@ class _CategoryBreakdownDonutState extends ConsumerState<CategoryBreakdownDonut>
   List<PieChartSectionData> _showingSections(Map<String, double> data, double total, List<Color> colors) {
     return data.entries.toList().asMap().entries.map((entry) {
       final isTouched = entry.key == touchedIndex;
-      final fontSize = isTouched ? 16.0 : 0.0; // Only show text on touch
+      final fontSize = isTouched ? 16.0 : 0.0; 
       final radius = isTouched ? 30.0 : 20.0;
       final dataEntry = entry.value;
       double pct = total == 0 ? 0 : (dataEntry.value / total) * 100;

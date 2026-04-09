@@ -7,15 +7,11 @@ import 'package:expense_tracker/features/insights/ui/insights_screen.dart';
 import 'package:expense_tracker/features/settings/ui/settings_screen.dart';
 import 'package:expense_tracker/features/dashboard/widgets/premium_bottom_nav_bar.dart';
 
-class MainShell extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:expense_tracker/features/dashboard/providers/navigation_provider.dart';
+
+class MainShell extends ConsumerWidget {
   const MainShell({super.key});
-
-  @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _currentIndex = 0;
 
   static const _pages = <Widget>[
     DashboardScreen(),
@@ -41,25 +37,26 @@ class _MainShellState extends State<MainShell> {
     ),
   ];
 
-  void _onTap(int index) {
-    if (_currentIndex == index) return;
-    HapticFeedback.selectionClick();
-    setState(() => _currentIndex = index);
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(navigationIndexProvider);
+
+    void onTap(int index) {
+      if (currentIndex == index) return;
+      HapticFeedback.selectionClick();
+      ref.read(navigationIndexProvider.notifier).state = index;
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      // Keep IndexedStack so each page retains its state
       body: IndexedStack(
-        index: _currentIndex,
+        index: currentIndex,
         children: _pages,
       ),
       bottomNavigationBar: PremiumBottomNavBar(
-        currentIndex: _currentIndex,
+        currentIndex: currentIndex,
         items: _navItems,
-        onTap: _onTap,
+        onTap: onTap,
       ),
     );
   }

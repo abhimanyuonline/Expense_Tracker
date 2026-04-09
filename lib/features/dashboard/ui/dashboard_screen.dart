@@ -8,6 +8,7 @@ import 'package:expense_tracker/features/dashboard/widgets/transaction_list.dart
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:expense_tracker/features/settings/providers/settings_provider.dart';
+import 'package:expense_tracker/features/sms_parser/providers/sms_provider.dart';
 import 'package:expense_tracker/features/sms_parser/services/sms_service.dart';
 import 'package:expense_tracker/features/sms_parser/ui/sms_confirmation_dialog.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +23,6 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  final SmsService _smsService = SmsService();
 
   @override
   void initState() {
@@ -32,7 +32,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   void _initSmsListener() {
     final settings = ref.read(settingsProvider);
-    _smsService.initListener((expense) {
+    final smsService = ref.read(smsServiceProvider);
+    smsService.initListener((expense) {
       _showConfirmationDialog(expense);
     }, settings);
   }
@@ -64,9 +65,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final expensesAsync = ref.watch(expenseListProvider);
-    // Explicitly watch settingsProvider so the screen rebuilds when currency/format changes
-    ref.watch(settingsProvider);
-    final settingsNotifier = ref.read(settingsProvider.notifier);
     
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
@@ -79,6 +77,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: expensesAsync.when(
             data: (expenses) => CustomScrollView(
+              physics: const BouncingScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
                   child: Column(

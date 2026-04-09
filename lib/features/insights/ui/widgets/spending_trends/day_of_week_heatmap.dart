@@ -26,7 +26,7 @@ class DayOfWeekHeatmap extends ConsumerWidget {
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         ),
       ),
       child: Column(
@@ -40,38 +40,43 @@ class DayOfWeekHeatmap extends ConsumerWidget {
               color: isDark ? Colors.white : Colors.black87,
             ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(7, (index) {
-              final val = heatmapData[index + 1] ?? 0.0;
-              final intensity = maxVal == 0 ? 0.0 : val / maxVal;
-              
-              return Column(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: Color.lerp(
-                        isDark ? Colors.white10 : Colors.black12,
-                        const Color(0xFFFF7A7A),
-                        intensity,
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    days[index],
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      color: isDark ? Colors.white54 : Colors.black54,
-                    ),
-                  ),
-                ],
-              );
-            }),
+          const SizedBox(height: 20),
+          RepaintBoundary(
+            child: Table(
+              children: [
+                TableRow(
+                  children: List.generate(7, (index) {
+                    final val = heatmapData[index + 1] ?? 0.0;
+                    final intensity = maxVal == 0 ? 0.0 : val / maxVal;
+                    
+                    return Column(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Color.lerp(
+                              isDark ? Colors.white10 : Colors.black12,
+                              const Color(0xFFFF7A7A),
+                              intensity,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          days[index],
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: isDark ? Colors.white54 : Colors.black54,
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ],
+            ),
           ),
         ],
       ),

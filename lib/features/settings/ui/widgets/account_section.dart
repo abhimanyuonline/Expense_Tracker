@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:expense_tracker/features/settings/ui/widgets/settings_tile.dart';
+import 'package:expense_tracker/data/local/isar_provider.dart';
 
-class AccountSection extends StatelessWidget {
+class AccountSection extends ConsumerWidget {
   const AccountSection({super.key});
 
   void _confirmDelete(BuildContext context) {
@@ -10,7 +12,13 @@ class AccountSection extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
-        title: Text('Delete Account', style: GoogleFonts.outfit(color: const Color(0xFFF87171), fontWeight: FontWeight.bold)),
+        title: Text(
+          'Delete Account', 
+          style: GoogleFonts.outfit(
+            color: const Color(0xFFF87171), 
+            fontWeight: FontWeight.bold
+          )
+        ),
         content: const Text('Are you sure you want to permanently delete your account and all local data? This action cannot be undone.'),
         actions: [
           TextButton(
@@ -34,7 +42,7 @@ class AccountSection extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -58,6 +66,26 @@ class AccountSection extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Google Sign-In logic coming soon.')),
             );
+          },
+        ),
+
+        const SizedBox(height: 8),
+
+        SettingsTile(
+          icon: Icons.download_rounded,
+          label: 'Export Data (JSON)',
+          onTap: () async {
+             try {
+               final isar = await ref.read(isarDbProvider.future);
+               final exportService = ref.read(dataExportServiceProvider(isar));
+               await exportService.exportAllDataAsJson();
+             } catch (e) {
+               if (context.mounted) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   SnackBar(content: Text('Export failed: $e')),
+                 );
+               }
+             }
           },
         ),
 
