@@ -49,3 +49,61 @@ final expenseCategoryTotalsProvider = Provider<Map<String, double>>((ref) {
     orElse: () => {},
   );
 });
+
+/// Groups last 7 days of expenses into [{dayIndex, amount, isToday}]
+final sevenDaySpendProvider = Provider<List<Map<String, dynamic>>>((ref) {
+  final expenses = ref.watch(expenseListProvider).valueOrNull ?? [];
+  final now = DateTime.now();
+  final result = <Map<String, dynamic>>[];
+  for (int i = 6; i >= 0; i--) {
+    final day = now.subtract(Duration(days: i));
+    final total = expenses
+        .where((e) =>
+            !e.isIncome &&
+            e.date.year == day.year &&
+            e.date.month == day.month &&
+            e.date.day == day.day)
+        .fold(0.0, (sum, e) => sum + e.amount);
+    result.add({'dayIndex': 6 - i, 'amount': total, 'isToday': i == 0});
+  }
+  return result;
+});
+
+/// Total income this calendar month
+final currentMonthIncomeProvider = Provider<double>((ref) {
+  final expenses = ref.watch(expenseListProvider).valueOrNull ?? [];
+  final now = DateTime.now();
+  return expenses
+      .where((e) => e.isIncome && e.date.year == now.year && e.date.month == now.month)
+      .fold(0.0, (sum, e) => sum + e.amount);
+});
+
+/// Total spend this calendar month
+final currentMonthSpendProvider = Provider<double>((ref) {
+  final expenses = ref.watch(expenseListProvider).valueOrNull ?? [];
+  final now = DateTime.now();
+  return expenses
+      .where((e) => !e.isIncome && e.date.year == now.year && e.date.month == now.month)
+      .fold(0.0, (sum, e) => sum + e.amount);
+});
+
+/// Top 4 merchants by spend this month, sorted descending
+final topMerchantsProvider = Provider<List<Map<String, dynamic>>>((ref) {
+  final expenses = ref.watch(expenseListProvider).valueOrNull ?? [];
+  final now = DateTime.now();
+  final Map<String, double> merchants = {};
+  final Map<String, bool> smsParsed = {};
+  for (final e in expenses) {
+    if (!e.isIncome && e.date.year == now.year && e.date.month == now.month) {
+      merchants[e.title] = (merchants[e.title] ?? 0.0) + e.amount;
+      if (e.smsId != null) smsParsed[e.title] = true;
+    }
+  }
+  final sorted = merchants.entries.toList()
+    ..sort((a, b) => b.value.compareTo(a.value));
+  return sorted.take(4).map((entry) => {
+    'merchant': entry.key,
+    'amount': entry.value,
+    'isSms': smsParsed[entry.key] ?? false,
+  }).toList();
+});

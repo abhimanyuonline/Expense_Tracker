@@ -1,4 +1,5 @@
 import 'package:expense_tracker/data/local/schemas/expense.dart';
+import 'package:expense_tracker/data/local/schemas/recurring_transaction.dart';
 import 'package:isar/isar.dart';
 
 class ExpenseRepository {
@@ -33,5 +34,25 @@ class ExpenseRepository {
       total += expense.amount;
     }
     return total;
+  }
+
+  // Mark a recurring bill as paid
+  Future<void> markBillAsPaid(int id) async {
+    await isar.writeTxn(() async {
+      final bill = await isar.recurringTransactions.get(id);
+      if (bill != null) {
+        bill.lastPaidDate = DateTime.now();
+        bill.nextDueDate = bill.nextDueDate.add(Duration(days: bill.frequencyDays));
+        await isar.recurringTransactions.put(bill);
+        
+        // Also create an actual expense entry for this payment
+        final expense = Expense()
+          ..title = bill.title
+          ..amount = bill.amount
+          ..date = DateTime.now()
+          ..category = bill.category;
+        await isar.expenses.put(expense);
+      }
+    });
   }
 }
